@@ -3,12 +3,20 @@ import ContactButtons from './components/ContactButtons';
 import CatalogDownload from './components/CatalogDownload';
 import ContactSettingsForm from './admin/ContactSettingsForm';
 import CatalogManager from './admin/CatalogManager';
+import LoginPage from './pages/LoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import { useAuth } from './context/AuthContext';
 
 export default function App() {
+  const { logout, token } = useAuth();
   return (
     <div style={{ padding: '1rem' }}>
-      <nav style={{ marginBottom: '1rem' }}>
-        <Link to="/">Home</Link> | <Link to="/admin">Admin</Link>
+      <nav className="mb-4 flex gap-4">
+        <Link to="/" className="text-blue-600 hover:underline">Home</Link>
+        <Link to="/admin" className="text-blue-600 hover:underline">Admin</Link>
+        {token && (
+          <button onClick={logout} className="text-red-600 hover:underline ml-auto">Logout</button>
+        )}
       </nav>
       <Routes>
         <Route
@@ -23,15 +31,18 @@ export default function App() {
             </div>
           }
         />
+        <Route path="/login" element={<LoginPage />} />
         <Route
           path="/admin"
           element={
-            <div>
-              <h1>Admin Panel</h1>
-              <ContactSettingsForm />
-              <hr />
-              <CatalogManager />
-            </div>
+            <ProtectedRoute>
+              <div>
+                <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
+                <ContactSettingsForm />
+                <hr className="my-6" />
+                <CatalogManager />
+              </div>
+            </ProtectedRoute>
           }
         />
       </Routes>

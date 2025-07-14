@@ -23,3 +23,10 @@ model CatalogFile {
   uploadedAt DateTime @default(now())
   isCurrent  Boolean  @default(false)
 }
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}

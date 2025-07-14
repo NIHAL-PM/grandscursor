@@ -11,19 +11,19 @@ export default function ContactButtons() {
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`;
 
   return (
-    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+    <div className="flex gap-4 flex-wrap">
       {phoneNumber && (
-        <a href={`tel:${phoneNumber}`} className="btn-primary">
+        <a href={`tel:${phoneNumber}`} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
           Call Us
         </a>
       )}
       {whatsappNumber && (
-        <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="btn-success">
+        <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
           WhatsApp
         </a>
       )}
       {emailAddress && (
-        <a href={`mailto:${emailAddress}`} className="btn-secondary">
+        <a href={`mailto:${emailAddress}`} className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
           Email Us
         </a>
       )}

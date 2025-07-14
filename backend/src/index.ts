@@ -6,6 +6,9 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { z } from 'zod';
+import helmet from 'helmet';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
@@ -13,9 +16,50 @@ const prisma = new PrismaClient();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(helmet());
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
+const JWT_SECRET = process.env.JWT_SECRET || 'changeme';
+
+// Auth middleware
+function authMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith('Bearer ')) return res.status(401).json({ message: 'Unauthorized' });
+  const token = auth.slice(7);
+  try {
+    const payload = jwt.verify(token, JWT_SECRET) as { userId: number };
+    (req as any).userId = payload.userId;
+    next();
+  } catch {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+}
+
+// Auto-create default admin user on first run
+(async () => {
+  const count = await prisma.user.count();
+  if (count === 0) {
+    const email = process.env.ADMIN_EMAIL || 'admin@example.com';
+    const password = process.env.ADMIN_PASSWORD || 'admin123';
+    const passwordHash = await bcrypt.hash(password, 10);
+    await prisma.user.create({ data: { email, passwordHash } });
+    console.log(`Default admin created. Email: ${email} Password: ${password}`);
+  }
+})();
+
+// Login endpoint
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body as { email: string; password: string };
+  if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) return res.status(400).json({ message: 'Invalid credentials' });
+  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '8h' });
+  res.json({ token });
+});
 
 // =============== Contact Settings ===============
 app.get('/api/contact-settings', async (_req, res) => {
@@ -45,7 +89,7 @@ const contactSchema = z.object({
   emailAddress: z.string().email(),
 });
 
-app.put('/api/contact-settings', async (req, res) => {
+app.put('/api/contact-settings', authMiddleware, async (req, res) => {
   const parse = contactSchema.safeParse(req.body);
   if (!parse.success) {
     return res.status(400).json({ message: 'Invalid payload', errors: parse.error.errors });
@@ -92,7 +136,7 @@ app.get('/api/catalog/current', async (_req, res) => {
 });
 
 // Upload new catalog
-app.post('/api/catalog', upload.single('file'), async (req, res) => {
+app.post('/api/catalog', authMiddleware, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'File required' });
   const { version } = req.body as { version?: string };
   try {
@@ -111,7 +155,7 @@ app.post('/api/catalog', upload.single('file'), async (req, res) => {
 });
 
 // Update catalog flags
-app.patch('/api/catalog/:id', async (req, res) => {
+app.patch('/api/catalog/:id', authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   const { isCurrent } = req.body as { isCurrent?: boolean };
   try {
@@ -128,7 +172,7 @@ app.patch('/api/catalog/:id', async (req, res) => {
 });
 
 // Delete catalog
-app.delete('/api/catalog/:id', async (req, res) => {
+app.delete('/api/catalog/:id', authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   try {
     const file = await prisma.catalogFile.findUnique({ where: { id } });

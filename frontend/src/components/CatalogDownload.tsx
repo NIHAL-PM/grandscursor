@@ -7,7 +7,7 @@ export default function CatalogDownload() {
   if (!data) return null;
 
   return (
-    <a href={data.fileUrl} download className="btn-accent">
+    <a href={data.fileUrl} download className="px-6 py-3 bg-orange-600 text-white rounded hover:bg-orange-700 transition">
       Download Product Catalog
     </a>
   );
