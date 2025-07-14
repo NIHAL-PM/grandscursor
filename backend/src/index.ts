@@ -146,5 +146,15 @@ app.delete('/api/catalog/:id', async (req, res) => {
   }
 });
 
+app.get('/api/catalog', async (_req, res) => {
+  try {
+    const list = await prisma.catalogFile.findMany({ orderBy: { uploadedAt: 'desc' } });
+    res.json(list);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`API server running on http://localhost:${PORT}`));
