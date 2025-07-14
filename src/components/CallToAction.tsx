@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { ArrowRight, Phone, Mail } from 'lucide-react'
+import { ArrowRight, Mail } from 'lucide-react'
 
-export default function CallToAction() {
+export default function CallToAction({ ctaText }: { ctaText?: string }) {
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-orange-600 to-orange-700">
       <div className="max-w-7xl mx-auto text-center">
@@ -9,10 +9,8 @@ export default function CallToAction() {
           Ready to Partner with Us?
         </h2>
         <p className="text-xl text-orange-100 mb-8 max-w-3xl mx-auto">
-          Join our network of successful distributors and retailers. Experience the Grand Foods difference 
-          with premium products, reliable service, and dedicated support.
+          {ctaText || 'Join our network of successful distributors and retailers. Experience the Grand Foods difference with premium products, reliable service, and dedicated support.'}
         </p>
-
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
           <Link
             href="/distributor"
@@ -21,7 +19,6 @@ export default function CallToAction() {
             Become a Distributor
             <ArrowRight size={20} />
           </Link>
-          
           <Link
             href="/contact"
             className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-orange-600 transition-colors flex items-center gap-2"
@@ -30,7 +27,6 @@ export default function CallToAction() {
             Contact Us
           </Link>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-white">
           <div>
             <h3 className="text-lg font-semibold mb-2">Quality Assurance</h3>

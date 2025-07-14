@@ -1,33 +1,52 @@
 import { Users, Award, Globe, TrendingUp } from 'lucide-react'
 
-export default function StatsSection() {
-  const stats = [
+interface Stat {
+  icon?: string
+  number: string
+  label: string
+  description: string
+}
+
+const iconMap: Record<string, JSX.Element> = {
+  users: <Users className="w-8 h-8 text-orange-600" />,
+  award: <Award className="w-8 h-8 text-orange-600" />,
+  globe: <Globe className="w-8 h-8 text-orange-600" />,
+  trending: <TrendingUp className="w-8 h-8 text-orange-600" />,
+}
+
+export default function StatsSection({ statsJson }: { statsJson?: string }) {
+  let stats: Stat[] = [
     {
-      icon: <Users className="w-8 h-8 text-orange-600" />,
+      icon: 'users',
       number: '1000+',
       label: 'Happy Customers',
-      description: 'Satisfied distributors and retailers'
+      description: 'Satisfied distributors and retailers',
     },
     {
-      icon: <Award className="w-8 h-8 text-orange-600" />,
+      icon: 'award',
       number: '25+',
       label: 'Years Experience',
-      description: 'Trusted name in food industry'
+      description: 'Trusted name in food industry',
     },
     {
-      icon: <Globe className="w-8 h-8 text-orange-600" />,
+      icon: 'globe',
       number: '500+',
       label: 'Products',
-      description: 'Diverse range of quality snacks'
+      description: 'Diverse range of quality snacks',
     },
     {
-      icon: <TrendingUp className="w-8 h-8 text-orange-600" />,
+      icon: 'trending',
       number: '99%',
       label: 'Quality Rating',
-      description: 'Consistent quality standards'
-    }
+      description: 'Consistent quality standards',
+    },
   ]
-
+  if (statsJson) {
+    try {
+      const parsed = JSON.parse(statsJson)
+      if (Array.isArray(parsed)) stats = parsed
+    } catch {}
+  }
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -39,12 +58,11 @@ export default function StatsSection() {
             Our commitment to excellence speaks through our achievements
           </p>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
             <div key={index} className="text-center bg-white p-6 rounded-lg shadow-md">
               <div className="flex justify-center mb-4">
-                {stat.icon}
+                {iconMap[stat.icon || 'users']}
               </div>
               <h3 className="text-3xl font-bold text-gray-900 mb-2">
                 {stat.number}
