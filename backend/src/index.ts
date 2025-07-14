@@ -237,5 +237,126 @@ app.delete('/api/products/:id', authMiddleware, async (req, res) => {
   res.json({ message: 'Deleted' });
 });
 
+// =============== Store Locator ===============
+app.get('/api/stores', async (_req, res) => {
+  const stores = await prisma.storeLocation.findMany();
+  res.json(stores);
+});
+
+app.post('/api/stores', authMiddleware, async (req, res) => {
+  const { name, address, lat, lng, phone } = req.body;
+  const store = await prisma.storeLocation.create({
+    data: { name, address, lat: Number(lat), lng: Number(lng), phone }
+  });
+  res.status(201).json(store);
+});
+
+app.put('/api/stores/:id', authMiddleware, async (req, res) => {
+  const { name, address, lat, lng, phone } = req.body;
+  const store = await prisma.storeLocation.update({
+    where: { id: Number(req.params.id) },
+    data: { name, address, lat: Number(lat), lng: Number(lng), phone }
+  });
+  res.json(store);
+});
+
+app.delete('/api/stores/:id', authMiddleware, async (req, res) => {
+  await prisma.storeLocation.delete({ where: { id: Number(req.params.id) } });
+  res.json({ message: 'Deleted' });
+});
+
+// =============== About Us ===============
+const aboutUpload = multer({ dest: 'uploads/about/' });
+
+app.get('/api/about', async (_req, res) => {
+  let about = await prisma.aboutPage.findUnique({ where: { id: 1 }, include: { teamProfiles: true } });
+  if (!about) {
+    about = await prisma.aboutPage.create({
+      data: { id: 1, heroImage: '', story: '', stats: '', manufacturingExcellence: '' }
+    });
+  }
+  res.json(about);
+});
+
+app.put('/api/about', authMiddleware, aboutUpload.single('heroImage'), async (req, res) => {
+  const { story, stats, manufacturingExcellence } = req.body;
+  const data: any = { story, stats, manufacturingExcellence };
+  if (req.file) data.heroImage = `/uploads/about/${req.file.filename}`;
+  const about = await prisma.aboutPage.update({ where: { id: 1 }, data });
+  res.json(about);
+});
+
+// Team Profiles
+const teamUpload = multer({ dest: 'uploads/about/team/' });
+
+app.post('/api/about/team', authMiddleware, teamUpload.single('image'), async (req, res) => {
+  const { name } = req.body;
+  const imageUrl = req.file ? `/uploads/about/team/${req.file.filename}` : '';
+  const profile = await prisma.teamProfile.create({
+    data: { name, imageUrl, aboutPageId: 1 }
+  });
+  res.status(201).json(profile);
+});
+
+app.put('/api/about/team/:id', authMiddleware, teamUpload.single('image'), async (req, res) => {
+  const { name } = req.body;
+  const data: any = { name };
+  if (req.file) data.imageUrl = `/uploads/about/team/${req.file.filename}`;
+  const profile = await prisma.teamProfile.update({ where: { id: Number(req.params.id) }, data });
+  res.json(profile);
+});
+
+app.delete('/api/about/team/:id', authMiddleware, async (req, res) => {
+  await prisma.teamProfile.delete({ where: { id: Number(req.params.id) } });
+  res.json({ message: 'Deleted' });
+});
+
+// =============== Distributor ===============
+const distributorUpload = multer({ dest: 'uploads/distributor/' });
+
+app.get('/api/distributor', async (_req, res) => {
+  let distributor = await prisma.distributorPage.findUnique({ where: { id: 1 }, include: { stories: true } });
+  if (!distributor) {
+    distributor = await prisma.distributorPage.create({
+      data: { id: 1, infoSections: '', requirements: '', supportServices: '' }
+    });
+  }
+  res.json(distributor);
+});
+
+app.put('/api/distributor', authMiddleware, async (req, res) => {
+  const { infoSections, requirements, supportServices } = req.body;
+  const distributor = await prisma.distributorPage.update({
+    where: { id: 1 },
+    data: { infoSections, requirements, supportServices }
+  });
+  res.json(distributor);
+});
+
+// Distributor Stories
+const storyUpload = multer({ dest: 'uploads/distributor/stories/' });
+
+app.post('/api/distributor/stories', authMiddleware, storyUpload.single('image'), async (req, res) => {
+  const { title, content } = req.body;
+  const imageUrl = req.file ? `/uploads/distributor/stories/${req.file.filename}` : '';
+  const story = await prisma.distributorStory.create({
+    data: { title, content, imageUrl, distributorPageId: 1 }
+  });
+  res.status(201).json(story);
+});
+
+app.put('/api/distributor/stories/:id', authMiddleware, storyUpload.single('image'), async (req, res) => {
+  const { title, content } = req.body;
+  const data: any = { title, content };
+  if (req.file) data.imageUrl = `/uploads/distributor/stories/${req.file.filename}`;
+  const story = await prisma.distributorStory.update({ where: { id: Number(req.params.id) }, data });
+  res.json(story);
+});
+
+app.delete('/api/distributor/stories/:id', authMiddleware, async (req, res) => {
+  await prisma.distributorStory.delete({ where: { id: Number(req.params.id) } });
+  res.json({ message: 'Deleted' });
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`API server running on http://localhost:${PORT}`));
