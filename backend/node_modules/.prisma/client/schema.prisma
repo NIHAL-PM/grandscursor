@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ContactSettings {
+  id             Int      @id @default(1)
+  phoneNumber    String
+  whatsappNumber String
+  emailAddress   String
+  updatedAt      DateTime @updatedAt
+}
+
+model CatalogFile {
+  id         Int      @id @default(autoincrement())
+  fileUrl    String
+  fileName   String
+  version    String?
+  uploadedAt DateTime @default(now())
+  isCurrent  Boolean  @default(false)
+}
