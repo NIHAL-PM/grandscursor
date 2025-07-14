@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  image       String
+  category    String
+  rating      Float    @default(5.0)
+  price       Float?
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactSettings {
+  id          String   @id @default(cuid())
+  phoneNumber String
+  whatsapp    String
+  email       String
+  address     String?
+  businessHours String?
+  updatedAt   DateTime @updatedAt
+}
+
+model ProductCatalog {
+  id          String   @id @default(cuid())
+  title       String
+  filename    String
+  originalName String
+  fileSize    Int
+  isActive    Boolean  @default(true)
+  uploadedAt  DateTime @default(now())
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  company   String?
+  message   String
+  rating    Int      @default(5)
+  image     String?
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Store {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  city        String
+  state       String
+  zipCode     String?
+  phone       String?
+  latitude    Float?
+  longitude   Float?
+  storeType   String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  title     String?
+  content   String
+  type      String   @default("text") // text, html, json
+  updatedAt DateTime @updatedAt
+}
+
+model ContactForm {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  company     String?
+  inquiryType String
+  message     String
+  status      String   @default("new") // new, read, replied
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
