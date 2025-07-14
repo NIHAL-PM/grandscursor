@@ -200,5 +200,42 @@ app.get('/api/catalog', async (_req, res) => {
   }
 });
 
+// =============== Products ===============
+import multer from 'multer';
+const productUpload = multer({ dest: 'uploads/products/' });
+
+app.get('/api/products', async (_req, res) => {
+  const products = await prisma.product.findMany();
+  res.json(products);
+});
+
+app.get('/api/products/:id', async (req, res) => {
+  const product = await prisma.product.findUnique({ where: { id: Number(req.params.id) } });
+  if (!product) return res.status(404).json({ message: 'Not found' });
+  res.json(product);
+});
+
+app.post('/api/products', authMiddleware, productUpload.single('image'), async (req, res) => {
+  const { name, description, category, price, rating } = req.body;
+  const imageUrl = req.file ? `/uploads/products/${req.file.filename}` : '';
+  const product = await prisma.product.create({
+    data: { name, description, category, price: price ? Number(price) : null, rating: rating ? Number(rating) : null, imageUrl }
+  });
+  res.status(201).json(product);
+});
+
+app.put('/api/products/:id', authMiddleware, productUpload.single('image'), async (req, res) => {
+  const { name, description, category, price, rating } = req.body;
+  const data: any = { name, description, category, price: price ? Number(price) : null, rating: rating ? Number(rating) : null };
+  if (req.file) data.imageUrl = `/uploads/products/${req.file.filename}`;
+  const product = await prisma.product.update({ where: { id: Number(req.params.id) }, data });
+  res.json(product);
+});
+
+app.delete('/api/products/:id', authMiddleware, async (req, res) => {
+  await prisma.product.delete({ where: { id: Number(req.params.id) } });
+  res.json({ message: 'Deleted' });
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`API server running on http://localhost:${PORT}`));
