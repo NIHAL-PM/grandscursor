@@ -201,20 +201,16 @@ app.get('/api/catalog', async (_req, res) => {
 });
 
 // =============== Products ===============
-import multer from 'multer';
 const productUpload = multer({ dest: 'uploads/products/' });
-
 app.get('/api/products', async (_req, res) => {
   const products = await prisma.product.findMany();
   res.json(products);
 });
-
 app.get('/api/products/:id', async (req, res) => {
   const product = await prisma.product.findUnique({ where: { id: Number(req.params.id) } });
   if (!product) return res.status(404).json({ message: 'Not found' });
   res.json(product);
 });
-
 app.post('/api/products', authMiddleware, productUpload.single('image'), async (req, res) => {
   const { name, description, category, price, rating } = req.body;
   const imageUrl = req.file ? `/uploads/products/${req.file.filename}` : '';
@@ -223,7 +219,6 @@ app.post('/api/products', authMiddleware, productUpload.single('image'), async (
   });
   res.status(201).json(product);
 });
-
 app.put('/api/products/:id', authMiddleware, productUpload.single('image'), async (req, res) => {
   const { name, description, category, price, rating } = req.body;
   const data: any = { name, description, category, price: price ? Number(price) : null, rating: rating ? Number(rating) : null };
@@ -231,18 +226,15 @@ app.put('/api/products/:id', authMiddleware, productUpload.single('image'), asyn
   const product = await prisma.product.update({ where: { id: Number(req.params.id) }, data });
   res.json(product);
 });
-
 app.delete('/api/products/:id', authMiddleware, async (req, res) => {
   await prisma.product.delete({ where: { id: Number(req.params.id) } });
   res.json({ message: 'Deleted' });
 });
-
 // =============== Store Locator ===============
 app.get('/api/stores', async (_req, res) => {
   const stores = await prisma.storeLocation.findMany();
   res.json(stores);
 });
-
 app.post('/api/stores', authMiddleware, async (req, res) => {
   const { name, address, lat, lng, phone } = req.body;
   const store = await prisma.storeLocation.create({
@@ -250,7 +242,6 @@ app.post('/api/stores', authMiddleware, async (req, res) => {
   });
   res.status(201).json(store);
 });
-
 app.put('/api/stores/:id', authMiddleware, async (req, res) => {
   const { name, address, lat, lng, phone } = req.body;
   const store = await prisma.storeLocation.update({
@@ -259,15 +250,12 @@ app.put('/api/stores/:id', authMiddleware, async (req, res) => {
   });
   res.json(store);
 });
-
 app.delete('/api/stores/:id', authMiddleware, async (req, res) => {
   await prisma.storeLocation.delete({ where: { id: Number(req.params.id) } });
   res.json({ message: 'Deleted' });
 });
-
 // =============== About Us ===============
 const aboutUpload = multer({ dest: 'uploads/about/' });
-
 app.get('/api/about', async (_req, res) => {
   let about = await prisma.aboutPage.findUnique({ where: { id: 1 }, include: { teamProfiles: true } });
   if (!about) {
@@ -277,7 +265,6 @@ app.get('/api/about', async (_req, res) => {
   }
   res.json(about);
 });
-
 app.put('/api/about', authMiddleware, aboutUpload.single('heroImage'), async (req, res) => {
   const { story, stats, manufacturingExcellence } = req.body;
   const data: any = { story, stats, manufacturingExcellence };
@@ -285,10 +272,8 @@ app.put('/api/about', authMiddleware, aboutUpload.single('heroImage'), async (re
   const about = await prisma.aboutPage.update({ where: { id: 1 }, data });
   res.json(about);
 });
-
 // Team Profiles
 const teamUpload = multer({ dest: 'uploads/about/team/' });
-
 app.post('/api/about/team', authMiddleware, teamUpload.single('image'), async (req, res) => {
   const { name } = req.body;
   const imageUrl = req.file ? `/uploads/about/team/${req.file.filename}` : '';
@@ -297,7 +282,6 @@ app.post('/api/about/team', authMiddleware, teamUpload.single('image'), async (r
   });
   res.status(201).json(profile);
 });
-
 app.put('/api/about/team/:id', authMiddleware, teamUpload.single('image'), async (req, res) => {
   const { name } = req.body;
   const data: any = { name };
@@ -305,15 +289,12 @@ app.put('/api/about/team/:id', authMiddleware, teamUpload.single('image'), async
   const profile = await prisma.teamProfile.update({ where: { id: Number(req.params.id) }, data });
   res.json(profile);
 });
-
 app.delete('/api/about/team/:id', authMiddleware, async (req, res) => {
   await prisma.teamProfile.delete({ where: { id: Number(req.params.id) } });
   res.json({ message: 'Deleted' });
 });
-
 // =============== Distributor ===============
 const distributorUpload = multer({ dest: 'uploads/distributor/' });
-
 app.get('/api/distributor', async (_req, res) => {
   let distributor = await prisma.distributorPage.findUnique({ where: { id: 1 }, include: { stories: true } });
   if (!distributor) {
@@ -323,7 +304,6 @@ app.get('/api/distributor', async (_req, res) => {
   }
   res.json(distributor);
 });
-
 app.put('/api/distributor', authMiddleware, async (req, res) => {
   const { infoSections, requirements, supportServices } = req.body;
   const distributor = await prisma.distributorPage.update({
@@ -332,10 +312,8 @@ app.put('/api/distributor', authMiddleware, async (req, res) => {
   });
   res.json(distributor);
 });
-
 // Distributor Stories
 const storyUpload = multer({ dest: 'uploads/distributor/stories/' });
-
 app.post('/api/distributor/stories', authMiddleware, storyUpload.single('image'), async (req, res) => {
   const { title, content } = req.body;
   const imageUrl = req.file ? `/uploads/distributor/stories/${req.file.filename}` : '';
@@ -344,7 +322,6 @@ app.post('/api/distributor/stories', authMiddleware, storyUpload.single('image')
   });
   res.status(201).json(story);
 });
-
 app.put('/api/distributor/stories/:id', authMiddleware, storyUpload.single('image'), async (req, res) => {
   const { title, content } = req.body;
   const data: any = { title, content };
@@ -352,7 +329,6 @@ app.put('/api/distributor/stories/:id', authMiddleware, storyUpload.single('imag
   const story = await prisma.distributorStory.update({ where: { id: Number(req.params.id) }, data });
   res.json(story);
 });
-
 app.delete('/api/distributor/stories/:id', authMiddleware, async (req, res) => {
   await prisma.distributorStory.delete({ where: { id: Number(req.params.id) } });
   res.json({ message: 'Deleted' });
